@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -16,13 +17,16 @@ using Windows.Storage;
 
 namespace WindowsFormsApp2
 {
+
     public partial class Form1 : Form
     {
+        // declare datapackage
+        private DataPackage dp;
+        private bool shareShown = false;
 
-        // check if datamanagerui is shown or not
-        private bool shareUIShown = false;
 
-        public Form1()
+
+    public Form1()
         {
             InitializeComponent();
             //this.Icon = Properties.Resources.logoFilledBlue.ico;
@@ -35,31 +39,44 @@ namespace WindowsFormsApp2
              * set the form to fill the entire screen so that whenever we click outside of it
              * the entire app is closed */
             this.Size = new Size(screenSize.Width, screenSize.Height);
+            this.Opacity = 0;
             this.CenterToScreen();
         }
 
-        protected override void OnLoad(EventArgs e)
+
+        //protected override void On
+        //OnActivated, OnClick, OnEnter, OnGotFocus
+        protected async override void OnActivated(EventArgs e)
         {
-            this.Opacity = 0;
-            base.OnLoad(e);
+            if (!shareShown)
+            {
+                Thread.Sleep(350);
+            }
+            
+            base.OnActivated(e);
+            //await PutTaskDelay(1000);
+            if (this.CanFocus && shareShown)
+            {
+                await PutTaskDelay(350);
+                if (this.CanFocus && shareShown)
+                {
+                    Application.Exit();
+                }
+            }
+            
         }
 
-        protected override void OnActivated(EventArgs e)
+        async Task PutTaskDelay(int period)
         {
-           // MessageBox.Show("Hello, World!");
-            base.OnActivated(e);
-            // if shareUI already shown, close app
-            if (shareUIShown)
-            {
-                Application.Exit();
-            }
+            await Task.Delay(period);
+            
         }
 
         async void OnDataRequested(DataTransferManager sender, DataRequestedEventArgs args)
         {
             var deferral = args.Request.GetDeferral();
             // create datapackage
-            DataPackage dp = args.Request.Data;
+            dp = args.Request.Data;
             // begin loading files
             try
             {
@@ -92,7 +109,7 @@ namespace WindowsFormsApp2
             }
             finally
             {
-                shareUIShown = true;
+                shareShown = true;
                 deferral.Complete();
             }
         }
@@ -101,12 +118,10 @@ namespace WindowsFormsApp2
         {
             IntPtr hwnd = Process.GetCurrentProcess().MainWindowHandle;
             var dtm = DataTransferManagerHelper.GetForWindow(hwnd);
-
             // Set datapackage to dtm
             dtm.DataRequested += OnDataRequested;
-
+            // show window
             DataTransferManagerHelper.ShowShareUIForWindow(hwnd);
-
         }
     }
 }
