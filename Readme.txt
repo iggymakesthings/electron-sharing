@@ -64,6 +64,12 @@ So, the name of the exe, followed by each file to be shared
 
 When the user clicks outside of the sharing dialog, our c# app is closed and stops running saving us memory
 
+A release is available here containing a precompiled version: https://drive.google.com/file/d/1jyBqO6jmGo5dSxw32LXa5lej1J3ElD34/view?usp=sharing
+
+TO DO
+===========
+Enable set light or dark mode
+
 Thanks
 
 
